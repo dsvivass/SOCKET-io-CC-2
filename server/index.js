@@ -20,9 +20,7 @@ io.on('connection', async (socket) => {
         console.log('A user disconnected');
     })
 
-
     socket.on('chat message', async (msg) => {
-        console.log('message: ' + msg);
 
         try {
             const message = await Message.create({ content: msg })
