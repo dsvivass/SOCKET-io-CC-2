@@ -11,15 +11,21 @@
             io
         } from "https://cdn.socket.io/4.3.2/socket.io.esm.min.js";
 
-        const socket = io()
+        const socket = io({
+            auth: {
+                serverOffset: 0 // Nos permite saber donde se ha quedado el cliente
+            }
+        })
 
         const form = document.querySelector('#form')
         const input = document.querySelector('#input')
         const messages = document.querySelector('#messages')
 
-        socket.on('chat message', msg => {
+        socket.on('chat message', (msg, serverOffset) => {
             const item = `<li>${msg}</li>`
             messages.insertAdjacentHTML('beforeend', item)
+            console.log({msg, serverOffset})
+            socket.auth.serverOffset = serverOffset // Actualizamos el offset del cliente
         })
 
         form.addEventListener('submit', e => {
