@@ -23,8 +23,9 @@ io.on('connection', async (socket) => {
     socket.on('chat message', async (msg) => {
 
         try {
-            const message = await Message.create({ content: msg })
-            io.emit('chat message', msg, message.id);
+            const username = socket.handshake.auth.username ?? 'Anonymous';
+            const message = await Message.create({ content: msg, user: username })
+            io.emit('chat message', msg, message.id, username);
         } catch (error) {
             console.log(error);
         }
@@ -46,7 +47,7 @@ io.on('connection', async (socket) => {
         });
 
         messages.forEach(message => {
-            socket.emit('chat message', message.content, message.id);
+            socket.emit('chat message', message.content, message.id, message.user);
         })
     }
 })

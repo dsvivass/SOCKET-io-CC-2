@@ -10,9 +10,22 @@
         import {
             io
         } from "https://cdn.socket.io/4.3.2/socket.io.esm.min.js";
+        
+        const getUsername = async () => {
+            let username = localStorage.getItem('username')
+
+            if (username) return username
+
+            const res = await fetch('https://random-data-api.com/api/users/random_user')
+            username = (await res.json()).username
+
+            localStorage.setItem('username', username)
+            return username
+        }
 
         const socket = io({
             auth: {
+                username: await getUsername(),
                 serverOffset: 0 // Nos permite saber donde se ha quedado el cliente
             }
         })
@@ -21,10 +34,12 @@
         const input = document.querySelector('#input')
         const messages = document.querySelector('#messages')
 
-        socket.on('chat message', (msg, serverOffset) => {
-            const item = `<li>${msg}</li>`
+        socket.on('chat message', (msg, serverOffset, username) => {
+            const item = `<li>
+                <p>${msg}</p>
+                <small>${new Date(Date.now()).toLocaleString()} ${username}</small>
+            </li>`
             messages.insertAdjacentHTML('beforeend', item)
-            console.log({msg, serverOffset})
             socket.auth.serverOffset = serverOffset // Actualizamos el offset del cliente
         })
 
@@ -59,9 +74,9 @@
         }
 
         #messages {
-            list-style-type: none;
             margin: 0;
             padding: 0;
+            overflow-y: scroll;
         }
 
         #messages>li {
@@ -75,7 +90,7 @@
         #chat {
             border: 1px solid #ccc;
             border-radius: 4px;
-            overflow: hidden;
+            overflow: auto;
             width: 350px;
             height: 100%;
             position: relative;
